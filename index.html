@@ -67,9 +67,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0
 .ccard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s;position:relative;overflow:hidden;}
 .ccard:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.4);}
 .ccard-top{height:3px;border-radius:14px 14px 0 0;position:absolute;top:0;left:0;right:0;background:var(--cc,var(--gold));}
-.ccard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
-.ccard-icon{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0;background:var(--ci,rgba(240,180,41,.1));}
-.cbadge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;}
+.ccard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.ccard-head-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.ccard-head-right{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.ccard-icon{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex-shrink:0;background:var(--ci,rgba(240,180,41,.1));}
+.cbadge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
 .cb-live{background:rgba(34,197,94,.15);color:var(--green);}
 .cb-vod{background:rgba(76,158,255,.12);color:var(--blue);}
 .cb-later{background:rgba(71,85,105,.2);color:var(--dim);}
@@ -102,7 +104,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0
 .ccard-link:hover{opacity:1;}
 
 /* PRIORITY BADGE */
-.priority{position:absolute;top:12px;right:12px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;color:var(--gold);background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);padding:2px 6px;border-radius:4px;}
+.priority{font-size:9px;font-weight:700;font-family:'Space Mono',monospace;color:var(--gold);background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);padding:2px 6px;border-radius:4px;white-space:nowrap;}
+
+/* SEARCH BAR */
+.search-wrap{position:relative;margin-bottom:20px;}
+.search-input{width:100%;padding:11px 16px 11px 42px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--gold);}
+.search-input::placeholder{color:var(--dim);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+.search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;display:none;}
+.search-clear:hover{color:var(--text);}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.filter-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--mid);font-size:11px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;}
+.filter-btn.active{background:var(--gold);color:#000;border-color:var(--gold);}
+.filter-btn:not(.active):hover{border-color:var(--border2);color:var(--text);}
+.search-empty{text-align:center;padding:40px 0;color:var(--dim);font-size:13px;}
+.search-count{font-size:11px;color:var(--dim);margin-bottom:12px;font-family:'Space Mono',monospace;}
 
 /* SCHEDULE SECTION */
 .week-grid{display:grid;grid-template-columns:60px repeat(7,1fr);gap:6px;margin-bottom:28px;}
@@ -222,6 +239,23 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0
   </div>
 
   <div class="sh">📖 강의 목록 · 진행 추적</div>
+
+  <!-- 검색 + 필터 -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="강의명, 강사, 플랫폼, 태그 검색...">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
+    <button class="filter-btn" onclick="setFilter('vod',this)">VOD</button>
+    <button class="filter-btn" onclick="setFilter('live',this)">🔴 LIVE</button>
+    <button class="filter-btn" onclick="setFilter('p1-3',this)">P1~3 우선</button>
+    <button class="filter-btn" onclick="setFilter('coding',this)">코딩/AI</button>
+    <button class="filter-btn" onclick="setFilter('money',this)">수익화</button>
+    <button class="filter-btn" onclick="setFilter('sns',this)">SNS/마케팅</button>
+  </div>
+  <div class="search-count" id="searchCount"></div>
   <div class="courses-grid" id="coursesGrid"></div>
 
 </div>
@@ -485,6 +519,7 @@ window.onload = function(){
   initDate();
   renderTopStats();
   renderCourses();
+  initSearch();
   renderWeekGrid();
   renderMayPlan();
   renderTaskList();
@@ -529,12 +564,79 @@ function renderTopStats(){
 // ══════════════════════════════════════════
 // RENDER COURSES
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// SEARCH & FILTER STATE
+// ══════════════════════════════════════════════════════════════════════
+let _searchQuery = '';
+let _activeFilter = 'all';
+
+function setFilter(type, btn) {
+  _activeFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCourses();
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  _searchQuery = '';
+  document.getElementById('searchClear').style.display = 'none';
+  renderCourses();
+}
+
+function filterCourses(courses) {
+  const q = _searchQuery.toLowerCase().trim();
+  const f = _activeFilter;
+
+  return courses.filter(c => {
+    // type filter
+    if (f === 'vod' && c.type !== 'vod') return false;
+    if (f === 'live' && c.type !== 'live') return false;
+    if (f === 'p1-3' && c.priority > 3) return false;
+    if (f === 'coding') {
+      const match = (c.tags||[]).some(t => /코딩|AI|자동화|SEO|클로드/.test(t));
+      if (!match) return false;
+    }
+    if (f === 'money') {
+      const match = (c.tags||[]).some(t => /수익화|애드센스|블로그|워드프레스/.test(t));
+      if (!match) return false;
+    }
+    if (f === 'sns') {
+      const match = (c.tags||[]).some(t => /SNS|마케팅|쇼핑|숏폼|인스타|콘텐츠/.test(t));
+      if (!match) return false;
+    }
+
+    // text search
+    if (!q) return true;
+    const searchable = [
+      c.title, c.instructor, c.platform,
+      ...(c.tags||[]),
+      ...(c.checkItems||[]).map(ci => ci.text)
+    ].join(' ').toLowerCase();
+    return searchable.includes(q);
+  });
+}
+
 function renderCourses(){
   const sorted=[...COURSES].sort((a,b)=>a.priority-b.priority);
+  const filtered = filterCourses(sorted);
   const grid=document.getElementById('coursesGrid');
-  grid.innerHTML=sorted.map(c=>buildCard(c)).join('');
+  const countEl = document.getElementById('searchCount');
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="search-empty" style="grid-column:1/-1">🔍 "<b>${_searchQuery||_activeFilter}</b>" 검색 결과가 없어요</div>`;
+    countEl.textContent = '';
+  } else {
+    grid.innerHTML=filtered.map(c=>buildCard(c)).join('');
+    if(_searchQuery || _activeFilter !== 'all'){
+      countEl.textContent = `${filtered.length}개 강의 표시 중 (전체 ${sorted.length}개)`;
+    } else {
+      countEl.textContent = '';
+    }
+  }
+
   // attach events
-  sorted.forEach(c=>{
+  filtered.forEach(c=>{
     const inp=document.getElementById('inp_'+c.id);
     if(inp){
       inp.value=getProgress(c.id);
@@ -543,7 +645,7 @@ function renderCourses(){
         const v=Math.max(0,Math.min(parseInt(inp.value)||0,c.total||999));
         setProgress(c.id,v);
         updateCardBar(c.id,c.total);
-        showToast('💾 저장됨');
+        showToast('📾 저장됐어요');
       });
     }
     c.checkItems.forEach(ci=>{
@@ -554,10 +656,22 @@ function renderCourses(){
         cb.addEventListener('change',()=>{
           setCheck(ci.id,cb.checked);
           updateCheckItem(ci.id);
-          showToast(cb.checked?'✅ 완료 체크!':'↩️ 체크 해제');
+          showToast(cb.checked?'✅ 완료됐어요!':'↩️ 되돌렸어요');
         });
       }
     });
+  });
+}
+
+// Search input wiring (called after DOM ready)
+function initSearch(){
+  const inp = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('searchClear');
+  if(!inp) return;
+  inp.addEventListener('input', () => {
+    _searchQuery = inp.value;
+    clearBtn.style.display = _searchQuery ? 'block' : 'none';
+    renderCourses();
   });
 }
 
@@ -567,23 +681,37 @@ function buildCard(c){
   const badgeText=c.type==='live'?'🔴 LIVE':c.type==='later'?'나중 추가':'VOD';
   const progVal=getProgress(c.id);
   const pct=c.total>0?Math.round(progVal/c.total*100):0;
+
+  // highlight matching search text
+  function hl(text){
+    if(!_searchQuery.trim()) return text;
+    const q=_searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return text.replace(new RegExp(`(${q})`,'gi'),'<mark style="background:rgba(240,180,41,.35);color:var(--gold);border-radius:2px;padding:0 1px;">$1</mark>');
+  }
+
   const checks=c.checkItems.map(ci=>`
     <div class="check-item ${getCheck(ci.id)?'done':''}" id="ci_${ci.id}">
       <input type="checkbox" id="cb_${ci.id}" ${getCheck(ci.id)?'checked':''}>
-      <label for="cb_${ci.id}">${ci.text}</label>
+      <label for="cb_${ci.id}">${hl(ci.text)}</label>
     </div>`).join('');
-  const isLive=c.type==='live';
   return `
   <div class="ccard" style="--cc:${c.color};--ci:${c.bg};${isLater?'opacity:.6':''}">
     <div class="ccard-top"></div>
-    <div class="priority">P${c.priority}</div>
     <div class="ccard-head">
-      <div class="ccard-icon">${c.icon}</div>
-      <span class="cbadge ${badgeClass}">${badgeText}</span>
+      <div class="ccard-head-left">
+        <div class="ccard-icon">${c.icon}</div>
+        <div style="min-width:0;flex:1;">
+          <div class="ccard-platform">${hl(c.platform)}</div>
+          <div class="ccard-title" style="font-size:13px;font-weight:700;line-height:1.3;">${hl(c.title)}</div>
+        </div>
+      </div>
+      <div class="ccard-head-right">
+        <span class="cbadge ${badgeClass}">${badgeText}</span>
+        <span class="priority">P${c.priority}</span>
+      </div>
     </div>
-    <div class="ccard-platform">${c.platform}</div>
-    <div class="ccard-title">${c.title}</div>
-    <div class="ccard-inst">${c.instructor}</div>
+    <div class="ccard-inst" style="font-size:11px;color:var(--dim);margin-bottom:4px;">${hl(c.instructor)}</div>
+    ${c.tags&&c.tags.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${c.tags.map(t=>`<span style="font-size:9px;padding:2px 6px;border-radius:10px;background:var(--s3);color:var(--mid);">${hl(t)}</span>`).join('')}</div>`:''} 
     <div class="ccard-meta">
       ${c.hours?`<span class="cmeta">⏱ ~${c.hours}h</span>`:''}
       ${c.total?`<span class="cmeta">🎬 ${c.total}강</span>`:'<span class="cmeta">📅 라이브</span>'}
@@ -601,6 +729,7 @@ function buildCard(c){
     ${checks?`<div class="check-list">${checks}</div>`:''}
     <a class="ccard-link" href="${c.url}" target="_blank">↗ 강의 바로가기</a>
   </div>`;
+}
 }
 
 function updateCardBar(id,total){
