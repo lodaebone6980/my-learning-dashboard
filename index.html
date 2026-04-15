@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 학습 대시보드 · 5월 목표</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080b12;--surface:#0f1320;--s2:#161c2e;--s3:#1e2540;
+  --border:#232a3e;--border2:#2d3655;
+  --gold:#f0b429;--blue:#4c9eff;--green:#22c55e;--red:#ef4444;
+  --purple:#a78bfa;--orange:#fb923c;--pink:#f472b6;--teal:#2dd4bf;
+  --text:#e2e8f0;--mid:#94a3b8;--dim:#475569;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 15% 5%,rgba(240,180,41,.05) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 85% 90%,rgba(76,158,255,.04) 0%,transparent 60%);
+  pointer-events:none;z-index:0;}
+
+.wrap{max-width:1440px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-logo-box{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),#b07800);border-radius:9px;display:grid;place-items:center;font-size:18px;}
+.nav-title{font-size:17px;font-weight:800;letter-spacing:-.5px;}
+.nav-sub{font-size:10px;color:var(--dim);font-family:'Space Mono',monospace;}
+.nav-tabs{display:flex;gap:4px;}
+.tab-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--mid);font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s;}
+.tab-btn.active{background:var(--gold);color:#000;border-color:var(--gold);}
+.tab-btn:not(.active):hover{border-color:var(--border2);color:var(--text);}
+
+/* SECTIONS */
+.section{display:none;padding:24px 0 40px;}
+.section.active{display:block;}
+
+/* TOP STATS */
+.top-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px;}
+.tstat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.tstat-v{font-size:24px;font-weight:900;font-family:'Space Mono',monospace;letter-spacing:-1px;color:var(--gold);}
+.tstat-l{font-size:10px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* GOAL BANNER */
+.goal-banner{background:linear-gradient(135deg,rgba(240,180,41,.12),rgba(251,146,60,.08));
+  border:1px solid rgba(240,180,41,.25);border-radius:16px;padding:20px 24px;margin-bottom:28px;}
+.goal-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.goal-title{font-size:17px;font-weight:800;color:var(--gold);}
+.goal-deadline{font-family:'Space Mono',monospace;font-size:12px;color:var(--orange);background:rgba(251,146,60,.15);padding:4px 10px;border-radius:6px;}
+.goal-projects{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.proj-tag{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid;display:flex;align-items:center;gap:6px;}
+.goal-progress{display:flex;flex-direction:column;gap:4px;}
+.gp-label{display:flex;justify-content:space-between;font-size:12px;color:var(--mid);}
+.gp-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.gp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--orange));transition:width 1s ease;}
+.countdown{font-size:13px;color:var(--text);font-weight:600;}
+.countdown span{color:var(--gold);font-family:'Space Mono',monospace;font-size:18px;font-weight:900;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.sh::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* COURSE CARDS */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;margin-bottom:32px;}
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s;position:relative;overflow:hidden;}
+.ccard:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.4);}
+.ccard-top{height:3px;border-radius:14px 14px 0 0;position:absolute;top:0;left:0;right:0;background:var(--cc,var(--gold));}
+.ccard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.ccard-icon{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0;background:var(--ci,rgba(240,180,41,.1));}
+.cbadge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;}
+.cb-live{background:rgba(34,197,94,.15);color:var(--green);}
+.cb-vod{background:rgba(76,158,255,.12);color:var(--blue);}
+.cb-later{background:rgba(71,85,105,.2);color:var(--dim);}
+.ccard-platform{font-size:9px;color:var(--dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.ccard-title{font-size:14px;font-weight:700;line-height:1.3;margin-bottom:2px;}
+.ccard-inst{font-size:11px;color:var(--dim);}
+.ccard-meta{display:flex;gap:10px;margin:10px 0;flex-wrap:wrap;}
+.cmeta{font-size:11px;color:var(--mid);}
+
+/* PROGRESS INPUT */
+.prog-row{display:flex;align-items:center;gap:8px;margin:10px 0;}
+.prog-input{width:64px;padding:5px 8px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;font-family:'Space Mono',monospace;text-align:center;}
+.prog-input:focus{outline:none;border-color:var(--gold);}
+.prog-slash{color:var(--dim);font-size:12px;font-family:'Space Mono',monospace;}
+.prog-total{color:var(--dim);font-size:12px;font-family:'Space Mono',monospace;}
+.prog-bar{margin-top:6px;}
+.pbar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:2px;background:var(--cc,var(--gold));transition:width .6s ease;width:0%;}
+.pbar-pct{font-size:10px;color:var(--dim);margin-top:3px;font-family:'Space Mono',monospace;}
+
+/* CHECK ITEMS */
+.check-list{display:flex;flex-direction:column;gap:4px;margin:8px 0;}
+.check-item{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--s2);border-radius:6px;cursor:pointer;transition:background .15s;}
+.check-item:hover{background:var(--s3);}
+.check-item input[type=checkbox]{accent-color:var(--cc,var(--gold));width:14px;height:14px;cursor:pointer;}
+.check-item label{font-size:11px;color:var(--mid);cursor:pointer;flex:1;}
+.check-item.done label{text-decoration:line-through;color:var(--dim);}
+
+.ccard-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--cc,var(--gold));text-decoration:none;font-weight:500;opacity:.75;transition:opacity .2s;margin-top:10px;}
+.ccard-link:hover{opacity:1;}
+
+/* PRIORITY BADGE */
+.priority{position:absolute;top:12px;right:12px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;color:var(--gold);background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);padding:2px 6px;border-radius:4px;}
+
+/* SCHEDULE SECTION */
+.week-grid{display:grid;grid-template-columns:60px repeat(7,1fr);gap:6px;margin-bottom:28px;}
+.wg-time{font-size:10px;font-family:'Space Mono',monospace;color:var(--dim);text-align:right;padding-top:4px;}
+.wg-head{text-align:center;font-size:11px;font-weight:700;color:var(--dim);padding:8px 4px;text-transform:uppercase;letter-spacing:.5px;}
+.wg-head.today{color:var(--gold);}
+.wg-cell{min-height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:500;line-height:1.3;padding:4px 3px;}
+.wg-empty{background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.04);border-radius:6px;}
+
+/* TIMELINE */
+.tl{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:28px;}
+.tl-row{display:flex;gap:14px;min-height:52px;position:relative;}
+.tl-t{width:48px;flex-shrink:0;font-size:10px;font-family:'Space Mono',monospace;color:var(--dim);padding-top:14px;text-align:right;}
+.tl-spine{width:2px;flex-shrink:0;background:var(--border);position:relative;}
+.tl-dot{position:absolute;top:14px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--border);border:2px solid var(--border2);}
+.tl-row.study .tl-spine{background:var(--tc,var(--gold));}
+.tl-row.study .tl-dot{background:var(--tc,var(--gold));border-color:var(--tc,var(--gold));box-shadow:0 0 8px var(--tc,var(--gold));}
+.tl-body{flex:1;padding:8px 0 8px;}
+.tl-blk{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.tl-row.study .tl-blk{border-left:3px solid var(--tc,var(--gold));background:rgba(255,255,255,.02);}
+.tl-name{font-size:13px;font-weight:600;}
+.tl-desc{font-size:11px;color:var(--dim);}
+.tl-dur{font-size:10px;font-family:'Space Mono',monospace;background:var(--border);padding:2px 7px;border-radius:4px;color:var(--mid);}
+
+/* CALENDAR/GCAL SECTION */
+.gcal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;}
+.gcal-title2{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.gcal-desc{font-size:12px;color:var(--mid);line-height:1.7;margin-bottom:16px;}
+.event-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.ev-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap;}
+.ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ev-name{font-size:12px;font-weight:500;flex:1;min-width:160px;}
+.ev-time{font-size:10px;color:var(--dim);font-family:'Space Mono',monospace;}
+.ev-btn{padding:5px 10px;border-radius:6px;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;}
+.gcal-dl-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s;margin-right:8px;}
+.gcal-dl-btn:hover{background:#3b8de8;transform:translateY(-1px);}
+.notion-dl-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#2d2d2d;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s;}
+.notion-dl-btn:hover{background:#404040;transform:translateY(-1px);}
+
+/* MAY PLAN */
+.may-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:28px;}
+.week-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.wk-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.wk-num{font-size:13px;font-weight:800;color:var(--gold);}
+.wk-dates{font-size:10px;color:var(--dim);font-family:'Space Mono',monospace;}
+.wk-courses{display:flex;flex-direction:column;gap:4px;}
+.wk-course{display:flex;align-items:center;gap:7px;padding:5px 8px;background:var(--s2);border-radius:6px;font-size:11px;}
+.wk-course-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.wk-course-name{color:var(--text);font-weight:500;flex:1;}
+.wk-course-h{font-size:10px;color:var(--dim);font-family:'Space Mono',monospace;}
+.wk-total{margin-top:8px;font-size:10px;color:var(--dim);text-align:right;font-family:'Space Mono',monospace;}
+
+/* NOTION SECTION */
+.notion-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;}
+.notion-export{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'Space Mono',monospace;font-size:11px;color:var(--mid);white-space:pre-wrap;line-height:1.7;max-height:300px;overflow-y:auto;margin-bottom:12px;}
+
+/* TOASTS */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+#toast.show{opacity:1;transform:translateY(0);}
+
+@media(max-width:768px){
+  .courses-grid{grid-template-columns:1fr;}
+  .week-grid{grid-template-columns:40px repeat(4,1fr);}
+  .top-stats{grid-template-columns:repeat(2,1fr);}
+  .may-grid{grid-template-columns:1fr;}
+}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-box">📚</div>
+    <div>
+      <div class="nav-title">학습 대시보드</div>
+      <div class="nav-sub">LEARNING OS · 5월 목표</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showTab('overview')">📊 현황</button>
+    <button class="tab-btn" onclick="showTab('schedule')">📅 스케줄</button>
+    <button class="tab-btn" onclick="showTab('mayplan')">🎯 5월계획</button>
+    <button class="tab-btn" onclick="showTab('sync')">🔗 캘린더·노션</button>
+  </div>
+</nav>
+
+<!-- ══════════════ TAB: OVERVIEW ══════════════ -->
+<div id="tab-overview" class="section active">
+
+  <!-- TOP STATS -->
+  <div style="padding-top:20px;"></div>
+  <div class="top-stats" id="topStats"></div>
+
+  <!-- GOAL BANNER -->
+  <div class="goal-banner">
+    <div class="goal-header">
+      <div>
+        <div class="goal-title">🎯 5월 목표 · 4가지 프로젝트 런칭</div>
+        <div class="countdown">D-<span id="dday">?</span> · 강의 완주 후 즉시 빌드 시작</div>
+      </div>
+      <div class="goal-deadline" id="deadlineEl">2026.05.31 마감</div>
+    </div>
+    <div class="goal-projects">
+      <div class="proj-tag" style="color:#a78bfa;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.1)">🔮 사주 웹사이트 (클로드코드)</div>
+      <div class="proj-tag" style="color:#4c9eff;border-color:rgba(76,158,255,.3);background:rgba(76,158,255,.1)">💰 애드센스 블로그 사이트</div>
+      <div class="proj-tag" style="color:#f472b6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.1)">📱 인스타·스레드 마케팅</div>
+      <div class="proj-tag" style="color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.1)">🛍️ 쇼핑쇼츠 플랫폼</div>
+    </div>
+    <div class="goal-progress">
+      <div class="gp-label"><span>전체 강의 진행률</span><span id="overallPct">0%</span></div>
+      <div class="gp-bar"><div class="gp-fill" id="overallBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sh">📖 강의 목록 · 진행 추적</div>
+  <div class="courses-grid" id="coursesGrid"></div>
+
+</div>
+
+<!-- ══════════════ TAB: SCHEDULE ══════════════ -->
+<div id="tab-schedule" class="section">
+  <div style="padding-top:20px;"></div>
+  <div class="sh">📅 주간 학습 스케줄</div>
+  <div class="week-grid" id="weekGrid"></div>
+
+  <div class="sh">🕐 하루 타임라인</div>
+  <div class="tl">
+    <div class="tl-row"><div class="tl-t">09:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">🌅 기상 · 준비</div><div class="tl-desc">아침식사 · 루틴</div></div><div class="tl-dur">30min</div></div></div></div>
+    <div class="tl-row study" style="--tc:#a78bfa"><div class="tl-t">09:30</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">📚 오전 블록 1 — 코딩/AI</div><div class="tl-desc">짐코딩 클로드코드 → TTJ 코딩 → 트렌더스</div></div><div class="tl-dur">2.5h</div></div></div></div>
+    <div class="tl-row"><div class="tl-t">12:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">🍚 점심 · 가벼운 복습</div><div class="tl-desc">노트 정리 or 유튜브 가볍게</div></div><div class="tl-dur">1h</div></div></div></div>
+    <div class="tl-row study" style="--tc:#4c9eff"><div class="tl-t">13:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">📚 오후 블록 2 — 수익화/블로그</div><div class="tl-desc">로알남 프레스런 → 알파남 애드센스팜</div></div><div class="tl-dur">3h</div></div></div></div>
+    <div class="tl-row"><div class="tl-t">16:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">💪 운동 · 휴식</div><div class="tl-desc">산책 or 헬스 — 뇌 리셋</div></div><div class="tl-dur">1.5h</div></div></div></div>
+    <div class="tl-row study" style="--tc:#22c55e"><div class="tl-t">17:30</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">📚 오후 블록 3 — 마케팅/쇼핑</div><div class="tl-desc">냐미 쇼핑 → 콘텐츠농부 → 현우 사주</div></div><div class="tl-dur">1.5h</div></div></div></div>
+    <div class="tl-row"><div class="tl-t">19:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">🍖 저녁식사</div><div class="tl-desc">🔴 일요일 19:00 → 유한 라이브!</div></div><div class="tl-dur">1h</div></div></div></div>
+    <div class="tl-row study" style="--tc:#fb923c"><div class="tl-t">20:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">📚 야간 블록 4 — SNS/라이브 복습</div><div class="tl-desc">오파독 머니루트 → 실습 · 과제 수행</div></div><div class="tl-dur">4h</div></div></div></div>
+    <div class="tl-row"><div class="tl-t">00:00</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">📝 TIL 작성 · 마무리</div><div class="tl-desc">오늘 배운 것 정리 · 내일 준비</div></div><div class="tl-dur">1h</div></div></div></div>
+    <div class="tl-row"><div class="tl-t">01:30</div><div class="tl-spine"><div class="tl-dot"></div></div><div class="tl-body"><div class="tl-blk"><div><div class="tl-name">😴 취침</div></div></div></div></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: MAY PLAN ══════════════ -->
+<div id="tab-mayplan" class="section">
+  <div style="padding-top:20px;"></div>
+  <div class="sh">🎯 5월 완주 계획 — 빡빡 집중 모드</div>
+  <div class="goal-banner" style="margin-bottom:20px;">
+    <div class="goal-header" style="margin-bottom:12px;">
+      <div class="goal-title">⚡ 전략: 목표 역산 → 강의 우선순위화</div>
+    </div>
+    <div style="font-size:13px;color:var(--mid);line-height:1.8;">
+      <b style="color:var(--gold)">총 가용 시간</b>: 4월15일~5월31일 = 47일 × 7시간 = <b style="color:var(--text)">329시간</b><br>
+      <b style="color:var(--gold)">강의 예상 시간</b>: ~160시간 (과제 포함 ~200시간)<br>
+      <b style="color:var(--gold)">남은 시간</b>: ~130시간 → <b style="color:var(--green)">프로젝트 빌드 충분!</b><br>
+      <b style="color:var(--orange)">핵심 원칙</b>: 이해 안되면 일단 넘기고 → 과제할 때 막히면 다시 보기
+    </div>
+  </div>
+
+  <div class="may-grid" id="mayGrid"></div>
+
+  <div class="sh">📋 강의별 핵심 과제 체크리스트</div>
+  <div id="taskList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;"></div>
+</div>
+
+<!-- ══════════════ TAB: SYNC ══════════════ -->
+<div id="tab-sync" class="section">
+  <div style="padding-top:20px;"></div>
+
+  <!-- Google Calendar -->
+  <div class="gcal-box">
+    <div class="gcal-title2">📅 Google Calendar — ICS 파일 다운로드</div>
+    <div class="gcal-desc">
+      아래 버튼을 누르면 <b style="color:var(--text)">4월 15일 ~ 5월 31일</b>까지의 전체 학습 일정이 담긴 ICS 파일이 생성됩니다.<br>
+      Google Calendar에서 <b style="color:var(--gold)">설정 → 가져오기</b>로 업로드하면 모든 블록이 한번에 등록돼요.
+    </div>
+    <div class="event-list" id="eventPreview"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <button class="gcal-dl-btn" onclick="downloadICS()">📅 ICS 파일 다운로드</button>
+      <a href="https://calendar.google.com/calendar/r" target="_blank" class="notion-dl-btn">↗ 구글 캘린더 열기</a>
+    </div>
+  </div>
+
+  <!-- Notion Export -->
+  <div class="notion-box">
+    <div class="gcal-title2">📝 Notion — 진행현황 내보내기</div>
+    <div class="gcal-desc">
+      현재 체크한 진행 상황을 노션 테이블 형식으로 내보냅니다.<br>
+      Notion에서 <b style="color:var(--gold)">새 페이지 → /table → 우상단 ··· → CSV 가져오기</b>로 붙여넣을 수 있어요.
+    </div>
+    <div class="notion-export" id="notionExport">진행 현황 로딩 중...</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <button class="gcal-dl-btn" onclick="downloadNotion()">📋 CSV 다운로드 (Notion 임포트)</button>
+      <button class="notion-dl-btn" onclick="copyNotionMD()">📎 Markdown 복사</button>
+      <button class="notion-dl-btn" onclick="refreshNotion()">🔄 새로고침</button>
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--dim);line-height:1.8;">
+      💡 <b style="color:var(--mid)">Notion 자동 연동 팁</b>: Make.com 또는 n8n (오파독 강의에서 배움!)으로 
+      웹훅 연결하면 이 대시보드 → Notion 자동 업데이트 가능해요.
+    </div>
+  </div>
+
+  <!-- 개별 캘린더 추가 -->
+  <div class="gcal-box">
+    <div class="gcal-title2">🔗 라이브 강의 캘린더 등록</div>
+    <div class="event-list" id="liveEvents"></div>
+  </div>
+
+</div>
+
+</div><!-- /wrap -->
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const COURSES = [
+  {
+    id:'jimcoding', icon:'🤖', platform:'인프런', title:'클로드 코드 완벽 마스터',
+    instructor:'짐코딩', hours:20, total:163, type:'vod',
+    color:'#a78bfa', bg:'rgba(167,139,250,.1)',
+    url:'https://www.inflearn.com/courses/lecture?courseId=339317',
+    tags:['AI','코딩','클로드'], priority:1,
+    checkItems:[
+      {id:'jc1', text:'MCP 서버 연동 실습 완료'},
+      {id:'jc2', text:'프로필 웹사이트 미션 완료'},
+      {id:'jc3', text:'에이전트 플로우 과제 완료'},
+    ]
+  },
+  {
+    id:'opadok', icon:'📱', platform:'머니루트', title:'AI 숏폼공장 수익화',
+    instructor:'오파독', hours:12, total:9, type:'live',
+    color:'#f472b6', bg:'rgba(244,114,182,.1)',
+    url:'https://moneyroot.co.kr/classes/view?order_id=75384&lecture_id=306002',
+    tags:['숏폼','AI','수익화'], priority:3,
+    checkItems:[
+      {id:'op1', text:'[4/9 1주차] 수익화 퍼널 설계 시청'},
+      {id:'op2', text:'[4/16 2주차] 오파독 AI 사용법 시청'},
+      {id:'op3', text:'[4/23 3주차] 콘텐츠 업로드 실습'},
+      {id:'op4', text:'[4/30 4주차] LV3 운영 계약 시청'},
+      {id:'op5', text:'챕터3 자동화 실습 완료'},
+    ]
+  },
+  {
+    id:'hyunwoo', icon:'🔮', platform:'YouTube', title:'사주강의',
+    instructor:'현우 (Louis)', hours:13, total:4, type:'vod',
+    color:'#f0b429', bg:'rgba(240,180,41,.1)',
+    url:'https://www.youtube.com/watch?v=twe8QCmRuhs&list=PLXiVAg62ZS1PwW6J4AvmGv8K4hlMuw4uu',
+    tags:['사주','자기계발'], priority:6,
+    checkItems:[
+      {id:'hw1', text:'1차시 (3:27) 시청 완료'},
+      {id:'hw2', text:'2차시 (2:58) 시청 완료'},
+      {id:'hw3', text:'3차시 (3:43) 시청 완료'},
+      {id:'hw4', text:'4차시 (2:53) 시청 완료'},
+    ]
+  },
+  {
+    id:'presslearn', icon:'✍️', platform:'프레스런', title:'구글 수익화 블로그 올인원',
+    instructor:'로알남', hours:40, total:420, type:'vod',
+    color:'#4c9eff', bg:'rgba(76,158,255,.1)',
+    url:'https://presslearn.co.kr/myClass?id=145',
+    tags:['워드프레스','애드센스','블로그'], priority:4,
+    checkItems:[
+      {id:'pl1', text:'CH1 워드프레스 기본 완료'},
+      {id:'pl2', text:'CH2 서버 설치 완료'},
+      {id:'pl3', text:'CH3-6 콘텐츠 전략 완료'},
+      {id:'pl4', text:'CH7-9 수익화 설정 완료'},
+      {id:'pl5', text:'CH10-12 SEO 최적화 완료'},
+      {id:'pl6', text:'[고급] AI 글쓰기 완료'},
+    ]
+  },
+  {
+    id:'trenders', icon:'🏥', platform:'트렌더스', title:'AI 병원마케팅',
+    instructor:'박정환 (라이언)', hours:15, total:10, type:'vod',
+    color:'#fb923c', bg:'rgba(251,146,60,.1)',
+    url:'https://www.trenders.info/courses/64b3c9a5-c4f8-41f5-9979-f44d8b3abb1e/lessons/752bed23-881c-442a-8f64-0de2e54e8131',
+    tags:['마케팅','병원','AI'], priority:7,
+    checkItems:[
+      {id:'tr1', text:'OT (1:30) 시청 완료'},
+      {id:'tr2', text:'1~3주차 강의 시청 완료'},
+      {id:'tr3', text:'4~5주차 현장강의 완료'},
+      {id:'tr4', text:'챌린지 1,2주차 완료'},
+    ]
+  },
+  {
+    id:'yuhan', icon:'🎥', platform:'싸이클해커스', title:'외국인 브이로그 유튜브',
+    instructor:'유한', hours:0, total:0, type:'live',
+    color:'#2dd4bf', bg:'rgba(45,212,191,.1)',
+    url:'https://drive.google.com/drive/folders/1Ztq-7oFo3PWjuBO72TZHfFXN6ogzTbyq',
+    tags:['유튜브','외국인','수익화'], priority:9,
+    checkItems:[
+      {id:'yh1', text:'[매주 일요일 19:00] 1주차 라이브 참석'},
+      {id:'yh2', text:'2주차 라이브 참석'},
+      {id:'yh3', text:'3주차 라이브 참석'},
+      {id:'yh4', text:'4주차 라이브 참석'},
+      {id:'yh5', text:'5주차 라이브 참석'},
+    ]
+  },
+  {
+    id:'nyami', icon:'🛍️', platform:'네이버카페', title:'쇼핑 수익화 강의',
+    instructor:'냐미', hours:9, total:2, type:'vod',
+    color:'#f472b6', bg:'rgba(244,114,182,.1)',
+    url:'https://cafe.naver.com/f-e/cafes/31618369/articles/248?boardtype=L&menuid=27',
+    tags:['쇼핑','수익화'], priority:5,
+    checkItems:[
+      {id:'ny1', text:'강의1 (4:57) 시청 완료'},
+      {id:'ny2', text:'강의1 실습 적용 완료'},
+      {id:'ny3', text:'강의2 (3:57) 시청 완료'},
+      {id:'ny4', text:'강의2 실습 적용 완료'},
+    ]
+  },
+  {
+    id:'adsense', icon:'🏢', platform:'애드센스팜', title:'상위 0.01% 온라인건물주 수익창출',
+    instructor:'알파남', hours:50, total:280, type:'vod',
+    color:'#4c9eff', bg:'rgba(76,158,255,.1)',
+    url:'https://adsensefarm.kr/eb8c80ec8b9cebb3b4eb939c/%ec%83%81%ec%9c%84-0-01-%ec%98%a8%eb%9d%bc%ec%9d%b8%ea%b1%b4%eb%ac%bc%ec%a3%bc-%ec%88%98%ec%9d%b5%ec%b0%bd%ec%b6%9c-%eb%b9%84%eb%b0%80-%ed%8f%ad%eb%a1%9c/lessons/1%ef%b8%8f%e2%83%a3%ec%88%98%ea%b0%95-%ec%a0%84-%eb%ac%b4%ec%a1%b0%ea%b1%b4-%ec%8b%9c%ec%b2%ad%ed%95%b4%ec%a3%bc%ec%84%b8%ec%9a%94-ot-%ec%98%81%ec%83%81/',
+    tags:['블로그','네이버','수익화'], priority:2,
+    checkItems:[
+      {id:'ad1', text:'섹션0 시작 전 자료 완료'},
+      {id:'ad2', text:'섹션1 (44강) 완료'},
+      {id:'ad3', text:'섹션2-3 완료'},
+      {id:'ad4', text:'섹션4-6 완료'},
+      {id:'ad5', text:'섹션7-10 완료'},
+      {id:'ad6', text:'보너스 강의 완료'},
+    ]
+  },
+  {
+    id:'richup', icon:'🌱', platform:'리치업스쿨', title:'콘텐츠농부 5기 정규강의',
+    instructor:'콘텐츠농부', hours:10, total:4, type:'vod',
+    color:'#fb923c', bg:'rgba(251,146,60,.1)',
+    url:'https://cafe.naver.com/f-e/cafes/31507163/menus/104?viewType=L',
+    tags:['콘텐츠','수익화'], priority:8,
+    checkItems:[
+      {id:'rc1', text:'1강 (2~3h) 시청 및 과제'},
+      {id:'rc2', text:'2강 (2~3h) 시청 및 과제'},
+      {id:'rc3', text:'3강 (2~3h) 시청 및 과제'},
+      {id:'rc4', text:'4강 (2~3h) 시청 및 과제'},
+    ]
+  },
+  {
+    id:'grow', icon:'📈', platform:'싸이클해커스', title:'그로우 홈페이지 강의',
+    instructor:'그로우', hours:0, total:0, type:'later',
+    color:'#64748b', bg:'rgba(100,116,139,.08)',
+    url:'#', tags:['마케팅'], priority:11,
+    checkItems:[]
+  },
+  {
+    id:'ttj', icon:'💻', platform:'TTJ 코딩클래스', title:'코딩으로 만드는 수익파이프 17단계',
+    instructor:'투더제이', hours:40, total:268, type:'vod',
+    color:'#22c55e', bg:'rgba(34,197,94,.1)',
+    url:'https://ttj.kr/mypage',
+    tags:['코딩','자동화','SEO'], priority:3,
+    checkItems:[
+      {id:'ttj1', text:'기초 코딩 시작과 자동화 (21강) 완료'},
+      {id:'ttj2', text:'중급 자동화 서버 구축 (23강) 완료'},
+      {id:'ttj3', text:'고급 SEO 마스터 (80강) 완료'},
+      {id:'ttj4', text:'정규반 수익파이프 17단계 (144강) 완료'},
+    ]
+  },
+];
+
+// ══════════════════════════════════════════
+// STATE (localStorage)
+// ══════════════════════════════════════════
+function getState(){return JSON.parse(localStorage.getItem('ls_dashboard')||'{}');}
+function saveState(s){localStorage.setItem('ls_dashboard',JSON.stringify(s));}
+
+function getProgress(id){const s=getState();return s['prog_'+id]||0;}
+function setProgress(id,v){const s=getState();s['prog_'+id]=v;saveState(s);updateOverall();}
+function getCheck(id){const s=getState();return !!s['chk_'+id];}
+function setCheck(id,v){const s=getState();s['chk_'+id]=v;saveState(s);updateOverall();}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.onload = function(){
+  initDate();
+  renderTopStats();
+  renderCourses();
+  renderWeekGrid();
+  renderMayPlan();
+  renderTaskList();
+  renderEventPreview();
+  renderLiveEvents();
+  updateOverall();
+  refreshNotion();
+};
+
+function initDate(){
+  const now=new Date();
+  const deadline=new Date('2026-05-31');
+  const diff=Math.ceil((deadline-now)/(1000*60*60*24));
+  document.getElementById('dday').textContent=diff;
+}
+
+function showTab(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if(name==='sync') refreshNotion();
+}
+
+// ══════════════════════════════════════════
+// RENDER TOP STATS
+// ══════════════════════════════════════════
+function renderTopStats(){
+  const totalH=COURSES.reduce((a,c)=>a+c.hours,0);
+  const totalL=COURSES.reduce((a,c)=>a+c.total,0);
+  const el=document.getElementById('topStats');
+  const stats=[
+    {v:COURSES.length+'개',l:'수강 강의',c:'var(--gold)'},
+    {v:'~'+totalH+'h',l:'총 강의 시간',c:'var(--purple)'},
+    {v:totalL+'강+',l:'총 강의 수',c:'var(--blue)'},
+    {v:'7h/일',l:'일일 목표',c:'var(--green)'},
+    {v:'D-'+Math.ceil((new Date('2026-05-31')-new Date())/(1000*60*60*24)),l:'5월31일까지',c:'var(--orange)'},
+  ];
+  el.innerHTML=stats.map(s=>`<div class="tstat"><div class="tstat-v" style="color:${s.c}">${s.v}</div><div class="tstat-l">${s.l}</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// RENDER COURSES
+// ══════════════════════════════════════════
+function renderCourses(){
+  const sorted=[...COURSES].sort((a,b)=>a.priority-b.priority);
+  const grid=document.getElementById('coursesGrid');
+  grid.innerHTML=sorted.map(c=>buildCard(c)).join('');
+  // attach events
+  sorted.forEach(c=>{
+    const inp=document.getElementById('inp_'+c.id);
+    if(inp){
+      inp.value=getProgress(c.id);
+      updateCardBar(c.id,c.total);
+      inp.addEventListener('input',()=>{
+        const v=Math.max(0,Math.min(parseInt(inp.value)||0,c.total||999));
+        setProgress(c.id,v);
+        updateCardBar(c.id,c.total);
+        showToast('💾 저장됨');
+      });
+    }
+    c.checkItems.forEach(ci=>{
+      const cb=document.getElementById('cb_'+ci.id);
+      if(cb){
+        cb.checked=getCheck(ci.id);
+        updateCheckItem(ci.id);
+        cb.addEventListener('change',()=>{
+          setCheck(ci.id,cb.checked);
+          updateCheckItem(ci.id);
+          showToast(cb.checked?'✅ 완료 체크!':'↩️ 체크 해제');
+        });
+      }
+    });
+  });
+}
+
+function buildCard(c){
+  const isLater=c.type==='later';
+  const badgeClass=c.type==='live'?'cb-live':c.type==='later'?'cb-later':'cb-vod';
+  const badgeText=c.type==='live'?'🔴 LIVE':c.type==='later'?'나중 추가':'VOD';
+  const progVal=getProgress(c.id);
+  const pct=c.total>0?Math.round(progVal/c.total*100):0;
+  const checks=c.checkItems.map(ci=>`
+    <div class="check-item ${getCheck(ci.id)?'done':''}" id="ci_${ci.id}">
+      <input type="checkbox" id="cb_${ci.id}" ${getCheck(ci.id)?'checked':''}>
+      <label for="cb_${ci.id}">${ci.text}</label>
+    </div>`).join('');
+  const isLive=c.type==='live';
+  return `
+  <div class="ccard" style="--cc:${c.color};--ci:${c.bg};${isLater?'opacity:.6':''}">
+    <div class="ccard-top"></div>
+    <div class="priority">P${c.priority}</div>
+    <div class="ccard-head">
+      <div class="ccard-icon">${c.icon}</div>
+      <span class="cbadge ${badgeClass}">${badgeText}</span>
+    </div>
+    <div class="ccard-platform">${c.platform}</div>
+    <div class="ccard-title">${c.title}</div>
+    <div class="ccard-inst">${c.instructor}</div>
+    <div class="ccard-meta">
+      ${c.hours?`<span class="cmeta">⏱ ~${c.hours}h</span>`:''}
+      ${c.total?`<span class="cmeta">🎬 ${c.total}강</span>`:'<span class="cmeta">📅 라이브</span>'}
+    </div>
+    ${c.total>0?`
+    <div class="prog-row">
+      <input class="prog-input" type="number" id="inp_${c.id}" min="0" max="${c.total}" placeholder="0">
+      <span class="prog-slash">/</span>
+      <span class="prog-total">${c.total}강</span>
+    </div>
+    <div class="prog-bar">
+      <div class="pbar-track"><div class="pbar-fill" id="bar_${c.id}" style="width:${pct}%"></div></div>
+      <div class="pbar-pct" id="pct_${c.id}">${pct}%</div>
+    </div>`:''}
+    ${checks?`<div class="check-list">${checks}</div>`:''}
+    <a class="ccard-link" href="${c.url}" target="_blank">↗ 강의 바로가기</a>
+  </div>`;
+}
+
+function updateCardBar(id,total){
+  const inp=document.getElementById('inp_'+id);
+  const bar=document.getElementById('bar_'+id);
+  const pct=document.getElementById('pct_'+id);
+  if(!inp||!bar) return;
+  const v=parseInt(inp.value)||0;
+  const p=total>0?Math.round(v/total*100):0;
+  bar.style.width=p+'%';
+  if(pct) pct.textContent=p+'%';
+}
+
+function updateCheckItem(id){
+  const item=document.getElementById('ci_'+id);
+  const cb=document.getElementById('cb_'+id);
+  if(!item||!cb) return;
+  item.classList.toggle('done',cb.checked);
+}
+
+function updateOverall(){
+  let total=0,done=0;
+  COURSES.forEach(c=>{
+    if(c.total>0){total+=c.total;done+=getProgress(c.id);}
+    c.checkItems.forEach(ci=>{total+=1;if(getCheck(ci.id))done+=1;});
+  });
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('overallBar').style.width=pct+'%';
+  document.getElementById('overallPct').textContent=pct+'%';
+}
+
+// ══════════════════════════════════════════
+// WEEK GRID
+// ══════════════════════════════════════════
+function renderWeekGrid(){
+  const days=['월','화','수','목','금','토','일'];
+  const todayIdx=(new Date().getDay()+6)%7;
+  const blocks=[
+    {time:'09:30',label:'코딩/AI\n블록1',colors:['#a78bfa','#22c55e','#fb923c','#a78bfa','#22c55e','#a78bfa','#94a3b8']},
+    {time:'13:00',label:'수익화\n블록2',colors:['#4c9eff','#4c9eff','#4c9eff','#4c9eff','#4c9eff','#4c9eff','#4c9eff']},
+    {time:'17:30',label:'단기강의\n블록3',colors:['#22c55e','#f472b6','#22c55e','#f0b429','#fb923c','#f472b6','#22c55e']},
+    {time:'20:00',label:'야간실습\n블록4',colors:['#fb923c','#fb923c','#f472b6','#fb923c','#fb923c','#f472b6','#2dd4bf']},
+  ];
+  const grid=document.getElementById('weekGrid');
+  // header row
+  grid.innerHTML=`<div></div>`+days.map((d,i)=>`<div class="wg-head ${i===todayIdx?'today':''}">${d}${i===todayIdx?' ●':''}</div>`).join('');
+  blocks.forEach(row=>{
+    grid.innerHTML+=`<div class="wg-time">${row.time}</div>`;
+    row.colors.forEach((col,i)=>{
+      const isLive=(i===6&&row.time==='20:00');
+      grid.innerHTML+=`<div class="wg-cell" style="background:${col}1a;color:${col};border-left:2px solid ${col};font-size:9px;white-space:pre-line;padding:4px;">${isLive?'🔴 유한\n라이브 19:00':row.label}</div>`;
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// MAY PLAN
+// ══════════════════════════════════════════
+const MAY_WEEKS=[
+  {
+    wk:'1주차',dates:'4/15 – 4/21',total:'49h',
+    courses:[
+      {name:'짐코딩 클로드코드',h:'20h',color:'#a78bfa',note:'전체 완주 목표'},
+      {name:'현우 사주강의',h:'5h',color:'#f0b429',note:'1~2차시'},
+      {name:'콘텐츠농부 1~2강',h:'6h',color:'#fb923c',note:'과제 포함'},
+    ]
+  },
+  {
+    wk:'2주차',dates:'4/22 – 4/28',total:'49h',
+    courses:[
+      {name:'알파남 애드센스팜',h:'20h',color:'#4c9eff',note:'섹션 0~2 집중'},
+      {name:'냐미 쇼핑 전강',h:'9h',color:'#f472b6',note:'전체 완주'},
+      {name:'오파독 2주차 라이브',h:'3h',color:'#f472b6',note:'수/토 시청'},
+      {name:'현우 사주 3~4차시',h:'7h',color:'#f0b429',note:'완주'},
+    ]
+  },
+  {
+    wk:'3주차',dates:'4/29 – 5/5',total:'49h',
+    courses:[
+      {name:'알파남 애드센스팜',h:'20h',color:'#4c9eff',note:'섹션 3~6'},
+      {name:'TTJ 기초+중급',h:'15h',color:'#22c55e',note:'44강 완주'},
+      {name:'오파독 3주차',h:'3h',color:'#f472b6',note:'실습 병행'},
+      {name:'콘텐츠농부 3~4강',h:'6h',color:'#fb923c',note:'완주'},
+    ]
+  },
+  {
+    wk:'4주차',dates:'5/6 – 5/12',total:'49h',
+    courses:[
+      {name:'로알남 프레스런',h:'20h',color:'#4c9eff',note:'CH1~6 완주'},
+      {name:'알파남 마무리',h:'10h',color:'#4c9eff',note:'섹션 7~보너스'},
+      {name:'트렌더스 박정환',h:'8h',color:'#fb923c',note:'OT~4주차'},
+      {name:'오파독 4주차',h:'3h',color:'#f472b6',note:'마무리'},
+    ]
+  },
+  {
+    wk:'5주차',dates:'5/13 – 5/19',total:'49h',
+    courses:[
+      {name:'로알남 프레스런',h:'20h',color:'#4c9eff',note:'CH7~고급 완주'},
+      {name:'TTJ SEO 마스터',h:'15h',color:'#22c55e',note:'80강 집중'},
+      {name:'트렌더스 마무리',h:'7h',color:'#fb923c',note:'5~7주차+보너스'},
+    ]
+  },
+  {
+    wk:'6주차 (빌드!)',dates:'5/20 – 5/31',total:'84h',
+    courses:[
+      {name:'TTJ 정규반 핵심',h:'20h',color:'#22c55e',note:'17단계 실전'},
+      {name:'🔨 사주 웹사이트 빌드',h:'20h',color:'#a78bfa',note:'클로드코드 활용'},
+      {name:'🔨 애드센스 블로그 론칭',h:'15h',color:'#4c9eff',note:'워드프레스 설정'},
+      {name:'🔨 인스타·스레드 세팅',h:'15h',color:'#f472b6',note:'오파독 전략 적용'},
+      {name:'🔨 쇼핑쇼츠 플랫폼',h:'10h',color:'#22c55e',note:'냐미 전략 적용'},
+    ]
+  },
+];
+
+function renderMayPlan(){
+  const grid=document.getElementById('mayGrid');
+  grid.innerHTML=MAY_WEEKS.map(w=>`
+    <div class="week-card">
+      <div class="wk-header">
+        <div class="wk-num">${w.wk}</div>
+        <div class="wk-dates">${w.dates}</div>
+      </div>
+      <div class="wk-courses">
+        ${w.courses.map(c=>`
+          <div class="wk-course">
+            <div class="wk-course-dot" style="background:${c.color}"></div>
+            <div class="wk-course-name">${c.name}<div style="font-size:9px;color:var(--dim)">${c.note}</div></div>
+            <div class="wk-course-h">${c.h}</div>
+          </div>`).join('')}
+      </div>
+      <div class="wk-total">총 ~${w.total} 학습</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// TASK LIST
+// ══════════════════════════════════════════
+function renderTaskList(){
+  const tasks=[
+    {cat:'🤖 클로드코드 과제',color:'#a78bfa',items:[
+      {id:'t_cc1',text:'미션1: 커서AI 연동 설정 완료'},
+      {id:'t_cc2',text:'미션5: 클로드코드로 프로필 웹사이트 만들기'},
+      {id:'t_cc3',text:'미션10: MCP 서버 연결 & 에이전트 플로우 구현'},
+      {id:'t_cc4',text:'미션15: 실전 프로젝트 — 사주 웹사이트 기본구조'},
+      {id:'t_cc5',text:'미션20이상: 완성된 사주+애드센스 사이트 배포'},
+    ]},
+    {cat:'💰 애드센스/블로그 과제',color:'#4c9eff',items:[
+      {id:'t_bl1',text:'워드프레스 + 호스팅 세팅 완료'},
+      {id:'t_bl2',text:'첫 애드센스 승인 신청'},
+      {id:'t_bl3',text:'키워드 분석 후 글 5편 발행'},
+      {id:'t_bl4',text:'GA4 + Search Console 연결'},
+      {id:'t_bl5',text:'애드센스 수익 $1 첫 달성'},
+    ]},
+    {cat:'📱 인스타·스레드 마케팅',color:'#f472b6',items:[
+      {id:'t_sn1',text:'숏폼 3개 기획 & 제작 완료'},
+      {id:'t_sn2',text:'스레드 계정 개설 + 첫 게시물'},
+      {id:'t_sn3',text:'AI 활용 자동 콘텐츠 파이프라인 구축'},
+      {id:'t_sn4',text:'팔로워 100명 달성'},
+    ]},
+    {cat:'🛍️ 쇼핑쇼츠 플랫폼',color:'#22c55e',items:[
+      {id:'t_sh1',text:'쇼핑 플랫폼 계정 세팅 완료'},
+      {id:'t_sh2',text:'첫 쇼핑쇼츠 영상 업로드'},
+      {id:'t_sh3',text:'상품 연결 & 수익화 설정'},
+      {id:'t_sh4',text:'월 판매 1건 달성'},
+    ]},
+  ];
+  const el=document.getElementById('taskList');
+  el.innerHTML=tasks.map(cat=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;color:${cat.color};margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        ${cat.cat}
+      </div>
+      <div class="check-list">
+        ${cat.items.map(item=>`
+          <div class="check-item ${getCheck(item.id)?'done':''}" id="ci_${item.id}">
+            <input type="checkbox" id="cb_${item.id}" ${getCheck(item.id)?'checked':''}>
+            <label for="cb_${item.id}">${item.text}</label>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  // attach
+  tasks.forEach(cat=>cat.items.forEach(item=>{
+    const cb=document.getElementById('cb_'+item.id);
+    if(cb){
+      cb.addEventListener('change',()=>{
+        setCheck(item.id,cb.checked);
+        updateCheckItem(item.id);
+        showToast(cb.checked?'✅ 과제 완료!':'↩️ 해제');
+      });
+    }
+  }));
+}
+
+// ══════════════════════════════════════════
+// ICS GENERATION
+// ══════════════════════════════════════════
+function padZ(n){return String(n).padStart(2,'0');}
+function fmtICS(d){
+  return d.getFullYear()+padZ(d.getMonth()+1)+padZ(d.getDate())+'T'+padZ(d.getHours())+padZ(d.getMinutes())+'00';}
+
+function genICS(){
+  const events=[];
+  const start=new Date('2026-04-15');
+  const end=new Date('2026-06-01');
+  const d=new Date(start);
+  while(d<end){
+    const dow=d.getDay(); // 0=sun, 1=mon...
+    const ds=d.getFullYear()+padZ(d.getMonth()+1)+padZ(d.getDate());
+    if(dow!==0){ // Mon-Sat
+      events.push({s:ds+'T093000',e:ds+'T120000',title:'📚 오전 강의블록 (코딩/AI)',desc:'짐코딩 클로드코드 / TTJ / 트렌더스',color:'purple'});
+      events.push({s:ds+'T130000',e:ds+'T160000',title:'📚 오후 강의블록 (수익화/블로그)',desc:'로알남 프레스런 / 알파남 애드센스팜',color:'blue'});
+      events.push({s:ds+'T173000',e:ds+'T190000',title:'📚 단기 강의블록 (마케팅/쇼핑)',desc:'냐미 / 콘텐츠농부 / 현우 사주',color:'green'});
+      events.push({s:ds+'T200000',e:ds+'T000000',title:'📚 야간 강의블록 + 실습',desc:'오파독 머니루트 / 과제 수행',color:'orange'});
+    }
+    if(dow===3||dow===6){ // Wed, Sat - 오파독 업로드
+      events.push({s:ds+'T200000',e:ds+'T230000',title:'🔴 오파독 머니루트 업로드 확인',desc:'AI 숏폼공장 새 강의 업로드일',color:'red'});
+    }
+    if(dow===0){ // Sunday - 유한 라이브
+      events.push({s:ds+'T190000',e:ds+'T220000',title:'🔴 [라이브] 유한 외국인 브이로그',desc:'싸이클해커스 유한 주간 라이브 강의',color:'teal'});
+      events.push({s:ds+'T093000',e:ds+'T120000',title:'📚 주말 복습블록',desc:'한 주 학습 복습 + TIL 정리',color:'gray'});
+    }
+    d.setDate(d.getDate()+1);
+  }
+  let ics='BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//학습대시보드//KR\nCALSCALE:GREGORIAN\nX-WR-CALNAME:📚 학습 스케줄\nX-WR-TIMEZONE:Asia/Seoul\n';
+  events.forEach((ev,i)=>{
+    const uid='study-'+i+'-'+Date.now()+'@dashboard';
+    ics+=`BEGIN:VEVENT\nUID:${uid}\nDTSTART;TZID=Asia/Seoul:${ev.s}\nDTEND;TZID=Asia/Seoul:${ev.e}\nSUMMARY:${ev.title}\nDESCRIPTION:${ev.desc}\nEND:VEVENT\n`;
+  });
+  ics+='END:VCALENDAR';
+  return ics;
+}
+
+function downloadICS(){
+  const ics=genICS();
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='학습스케줄_4월15일~5월31일.ics';
+  a.click();
+  showToast('📅 ICS 파일 다운로드 완료!\nGoogle Calendar에서 가져오기 하세요.');
+}
+
+function renderEventPreview(){
+  const evs=[
+    {dot:'#a78bfa',name:'오전 강의블록 (코딩/AI)',time:'월~토 09:30–12:00',btnUrl:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%93%9A+%EC%98%A4%EC%A0%84+%EA%B0%95%EC%9D%98%EB%B8%94%EB%A1%9D+%EC%BD%94%EB%94%A9%2FAI&dates=20260415T093000/20260415T120000&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA'},
+    {dot:'#4c9eff',name:'오후 강의블록 (수익화/블로그)',time:'월~토 13:00–16:00',btnUrl:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%93%9A+%EC%98%A4%ED%9B%84+%EA%B0%95%EC%9D%98%EB%B8%94%EB%A1%9D+%EC%88%98%EC%9D%B5%ED%99%94&dates=20260415T130000/20260415T160000&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA'},
+    {dot:'#22c55e',name:'단기 강의블록 (마케팅/쇼핑)',time:'월~토 17:30–19:00',btnUrl:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%93%9A+%EB%8B%A8%EA%B8%B0+%EA%B0%95%EC%9D%98%EB%B8%94%EB%A1%9D&dates=20260415T173000/20260415T190000&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA'},
+    {dot:'#fb923c',name:'야간 강의블록 + 실습',time:'월~토 20:00–00:00',btnUrl:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%93%9A+%EC%95%BC%EA%B0%84+%EA%B0%95%EC%9D%98%EB%B8%94%EB%A1%9D+%EC%8B%A4%EC%8A%B5&dates=20260415T200000/20260416T000000&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA'},
+  ];
+  document.getElementById('eventPreview').innerHTML=evs.map(e=>`
+    <div class="ev-row">
+      <div class="ev-dot" style="background:${e.dot}"></div>
+      <div class="ev-name">${e.name}</div>
+      <div class="ev-time">${e.time}</div>
+      <a href="${e.btnUrl}" target="_blank" class="ev-btn" style="background:${e.dot}22;color:${e.dot};border:1px solid ${e.dot}44;text-decoration:none;padding:4px 8px;border-radius:5px;font-size:10px;font-weight:700;">+ 추가</a>
+    </div>`).join('');
+}
+
+function renderLiveEvents(){
+  const liveEvs=[
+    {dot:'#2dd4bf',name:'🔴 유한 외국인 브이로그 라이브',time:'매주 일요일 19:00',url:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%94%B4+%EC%9C%A0%ED%95%9C+%EC%99%B8%EA%B5%AD%EC%9D%B8+%EB%B8%8C%EC%9D%B4%EB%A1%9C%EA%B7%B8+%EB%9D%BC%EC%9D%B4%EB%B8%8C&dates=20260419T190000/20260419T220000&recur=RRULE:FREQ=WEEKLY;BYDAY=SU'},
+    {dot:'#f472b6',name:'🔴 오파독 AI숏폼공장 업로드일',time:'매주 수/토 20:00',url:'https://calendar.google.com/calendar/render?action=TEMPLATE&text=%F0%9F%94%B4+%EC%98%A4%ED%8C%8C%EB%8F%85+AI%EC%88%8F%ED%8F%BC%EA%B3%B5%EC%9E%A5+%EC%97%85%EB%A1%9C%EB%93%9C&dates=20260415T200000/20260415T230000&recur=RRULE:FREQ=WEEKLY;BYDAY=WE,SA'},
+  ];
+  document.getElementById('liveEvents').innerHTML=liveEvs.map(e=>`
+    <div class="ev-row">
+      <div class="ev-dot" style="background:${e.dot}"></div>
+      <div class="ev-name">${e.name}</div>
+      <div class="ev-time">${e.time}</div>
+      <a href="${e.url}" target="_blank" class="ev-btn" style="background:${e.dot}22;color:${e.dot};border:1px solid ${e.dot}44;text-decoration:none;padding:4px 8px;border-radius:5px;font-size:10px;font-weight:700;">+ 추가</a>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// NOTION EXPORT
+// ══════════════════════════════════════════
+function getNotionData(){
+  return COURSES.map(c=>{
+    const prog=getProgress(c.id);
+    const pct=c.total>0?Math.round(prog/c.total*100):0;
+    const done=c.checkItems.filter(ci=>getCheck(ci.id)).length;
+    return {name:c.title,inst:c.instructor,platform:c.platform,total:c.total,progress:prog,pct,checkDone:done,checkTotal:c.checkItems.length,type:c.type,priority:c.priority};
+  });
+}
+
+function refreshNotion(){
+  const data=getNotionData();
+  const md=`# 📚 학습 진행 현황\n업데이트: ${new Date().toLocaleString('ko-KR')}\n\n## 강의 진행률\n\n| 강의 | 강사 | 플랫폼 | 진행 | 진도 | 체크리스트 |\n|---|---|---|---|---|---|\n`+
+    data.map(d=>`| ${d.name} | ${d.inst} | ${d.platform} | ${d.progress}/${d.total}강 | ${d.pct}% | ${d.checkDone}/${d.checkTotal} |`).join('\n');
+  document.getElementById('notionExport').textContent=md;
+}
+
+function downloadNotion(){
+  const data=getNotionData();
+  const csv='강의명,강사,플랫폼,현재강의,총강의,진도율(%),체크완료,체크전체,유형,우선순위\n'+
+    data.map(d=>`"${d.name}","${d.inst}","${d.platform}",${d.progress},${d.total},${d.pct},${d.checkDone},${d.checkTotal},${d.type},P${d.priority}`).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='학습진행현황_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('📋 CSV 다운로드 완료!\nNotion에서 가져오기 하세요.');
+}
+
+function copyNotionMD(){
+  const text=document.getElementById('notionExport').textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast('📎 Markdown 복사 완료!\nNotion에 바로 붙여넣기 하세요.'));
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
