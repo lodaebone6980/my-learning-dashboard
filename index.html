@@ -106,7 +106,32 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0
 /* PRIORITY BADGE */
 .priority{font-size:9px;font-weight:700;font-family:'Space Mono',monospace;color:var(--gold);background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);padding:2px 6px;border-radius:4px;white-space:nowrap;}
 
-/* SEARCH BAR */
+/* LAST STUDIED */
+.last-studied{font-size:10px;padding:4px 8px;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;}
+.last-studied b{font-weight:700;}
+.last-ok{background:rgba(34,197,94,.08);color:var(--green);}
+.last-warn{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25);animation:pulse-warn 2s ease-in-out infinite;}
+@keyframes pulse-warn{0%,100%{opacity:1;}50%{opacity:.7;}}
+.ccard-warn{border-color:rgba(239,68,68,.45)!important;box-shadow:0 0 12px rgba(239,68,68,.15)!important;}
+.ccard-warn .ccard-top{background:#ef4444!important;}
+
+/* STUDY STATUS PANEL */
+.study-status{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:24px;}
+.ss-title{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.ss-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.ss-rows{display:flex;flex-direction:column;gap:6px;}
+.ss-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--s2);border-radius:8px;border:1px solid var(--border);}
+.ss-row.ss-warn{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.25);}
+.ss-row.ss-active{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.2);}
+.ss-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ss-name{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ss-pct{font-size:10px;font-family:'Space Mono',monospace;color:var(--mid);flex-shrink:0;}
+.ss-last{font-size:10px;color:var(--dim);flex-shrink:0;font-family:'Space Mono',monospace;}
+.ss-warn-tag{font-size:9px;color:#ef4444;background:rgba(239,68,68,.15);padding:2px 6px;border-radius:4px;font-weight:700;flex-shrink:0;}
+.ss-minibar{height:3px;border-radius:2px;background:var(--border);width:60px;flex-shrink:0;overflow:hidden;}
+.ss-minibar-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+
+/* PROGRESS BAR → already have pbar */
 .search-wrap{position:relative;margin-bottom:20px;}
 .search-input{width:100%;padding:11px 16px 11px 42px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .2s;}
 .search-input:focus{border-color:var(--gold);}
@@ -235,6 +260,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0
     <div class="goal-progress">
       <div class="gp-label"><span>전체 강의 진행률</span><span id="overallPct">0%</span></div>
       <div class="gp-bar"><div class="gp-fill" id="overallBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- 학습 현황 패널 -->
+  <div class="study-status" id="studyStatusPanel">
+    <div class="ss-title">📊 전체 강의 학습 현황</div>
+    <div class="ss-rows" id="studyStatusRows">
+      <div style="color:var(--dim);font-size:12px;text-align:center;padding:8px;">강의를 수강하면 여기에 기록됩니다</div>
     </div>
   </div>
 
@@ -508,9 +541,26 @@ function getState(){return JSON.parse(localStorage.getItem('ls_dashboard')||'{}'
 function saveState(s){localStorage.setItem('ls_dashboard',JSON.stringify(s));}
 
 function getProgress(id){const s=getState();return s['prog_'+id]||0;}
-function setProgress(id,v){const s=getState();s['prog_'+id]=v;saveState(s);updateOverall();}
+function setProgress(id,v){
+  const s=getState();
+  s['prog_'+id]=v;
+  s['last_'+id]=new Date().toISOString();
+  saveState(s);
+  updateOverall();
+  updateCardBar(id, (COURSES.find(c=>c.id===id)||{}).total||0);
+  renderStudyStatus();
+}
 function getCheck(id){const s=getState();return !!s['chk_'+id];}
-function setCheck(id,v){const s=getState();s['chk_'+id]=v;saveState(s);updateOverall();}
+function setCheck(id,v){
+  const s=getState();
+  s['chk_'+id]=v;
+  // 해당 체크가 속한 강의를 찾아서 lastStudied 업데이트
+  const course=COURSES.find(c=>c.checkItems.some(ci=>ci.id===id));
+  if(course) s['last_'+course.id]=new Date().toISOString();
+  saveState(s);
+  updateOverall();
+  renderStudyStatus();
+}
 
 // ══════════════════════════════════════════
 // INIT
@@ -526,6 +576,7 @@ window.onload = function(){
   renderEventPreview();
   renderLiveEvents();
   updateOverall();
+  renderStudyStatus();
   refreshNotion();
 };
 
@@ -682,6 +733,26 @@ function buildCard(c){
   const progVal=getProgress(c.id);
   const pct=c.total>0?Math.round(progVal/c.total*100):0;
 
+  // last studied
+  const lastISO = getState()['last_'+c.id];
+  let lastStudiedHtml = '';
+  let cardWarning = false;
+  if(lastISO){
+    const diffMs = Date.now() - new Date(lastISO).getTime();
+    const diffDays = Math.floor(diffMs / (1000*60*60*24));
+    const diffHours = Math.floor(diffMs / (1000*60*60));
+    let label, warnClass='';
+    if(diffHours < 1) label = '방금 전';
+    else if(diffHours < 24) label = diffHours+'시간 전';
+    else if(diffDays === 1) label = '어제';
+    else label = diffDays+'일 전';
+    if(diffDays >= 3){ warnClass='last-warn'; cardWarning=true; }
+    else if(diffDays >= 1){ warnClass='last-ok'; }
+    lastStudiedHtml = `<div class="last-studied ${warnClass}">
+      ${diffDays>=3?'⚠️':'🕐'} 최근학습 <b>${label}</b>${diffDays>=3?' · 다시 시작해봐요!':''}
+    </div>`;
+  }
+
   // highlight matching search text
   function hl(text){
     if(!_searchQuery.trim()) return text;
@@ -695,7 +766,7 @@ function buildCard(c){
       <label for="cb_${ci.id}">${hl(ci.text)}</label>
     </div>`).join('');
   return `
-  <div class="ccard" style="--cc:${c.color};--ci:${c.bg};${isLater?'opacity:.6':''}">
+  <div class="ccard ${cardWarning?'ccard-warn':''}" style="--cc:${c.color};--ci:${c.bg};${isLater?'opacity:.6':''}">
     <div class="ccard-top"></div>
     <div class="ccard-head">
       <div class="ccard-head-left">
@@ -712,6 +783,7 @@ function buildCard(c){
     </div>
     <div class="ccard-inst" style="font-size:11px;color:var(--dim);margin-bottom:4px;">${hl(c.instructor)}</div>
     ${c.tags&&c.tags.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${c.tags.map(t=>`<span style="font-size:9px;padding:2px 6px;border-radius:10px;background:var(--s3);color:var(--mid);">${hl(t)}</span>`).join('')}</div>`:''} 
+    ${lastStudiedHtml}
     <div class="ccard-meta">
       ${c.hours?`<span class="cmeta">⏱ ~${c.hours}h</span>`:''}
       ${c.total?`<span class="cmeta">🎬 ${c.total}강</span>`:'<span class="cmeta">📅 라이브</span>'}
@@ -758,6 +830,69 @@ function updateOverall(){
   const pct=total>0?Math.round(done/total*100):0;
   document.getElementById('overallBar').style.width=pct+'%';
   document.getElementById('overallPct').textContent=pct+'%';
+}
+
+// ══════════════════════════════════════════
+// STUDY STATUS PANEL
+// ══════════════════════════════════════════
+function renderStudyStatus(){
+  const s=getState();
+  const now=Date.now();
+
+  // 학습 기록이 있는 강의만
+  const studied=COURSES.map(c=>{
+    const lastISO=s['last_'+c.id];
+    const prog=getProgress(c.id);
+    const pct=c.total>0?Math.round(prog/c.total*100):0;
+    const checkDone=c.checkItems.filter(ci=>getCheck(ci.id)).length;
+    const hasActivity = lastISO || prog>0 || checkDone>0;
+    if(!hasActivity) return null;
+    const diffMs=lastISO?(now-new Date(lastISO).getTime()):null;
+    const diffDays=diffMs!=null?Math.floor(diffMs/(1000*60*60*24)):null;
+    const diffHours=diffMs!=null?Math.floor(diffMs/(1000*60*60)):null;
+    let lastLabel='기록없음';
+    if(diffMs!=null){
+      if(diffHours<1) lastLabel='방금 전';
+      else if(diffHours<24) lastLabel=diffHours+'시간 전';
+      else if(diffDays===1) lastLabel='어제';
+      else lastLabel=diffDays+'일 전';
+    }
+    return {c, prog, pct, checkDone, diffDays, diffHours, lastLabel, hasISO:!!lastISO};
+  }).filter(Boolean);
+
+  const rowsEl=document.getElementById('studyStatusRows');
+  if(!rowsEl) return;
+
+  if(studied.length===0){
+    rowsEl.innerHTML=`<div style="color:var(--dim);font-size:12px;text-align:center;padding:8px;">강의를 수강하면 여기에 기록됩니다</div>`;
+    return;
+  }
+
+  // 정렬: 경고(3일↑) 먼저, 그 다음 최근 순
+  studied.sort((a,b)=>{
+    const aWarn=(a.diffDays!=null&&a.diffDays>=3)?1:0;
+    const bWarn=(b.diffDays!=null&&b.diffDays>=3)?1:0;
+    if(bWarn!==aWarn) return bWarn-aWarn;
+    if(a.diffDays==null) return 1;
+    if(b.diffDays==null) return -1;
+    return a.diffDays-b.diffDays;
+  });
+
+  rowsEl.innerHTML=studied.map(({c,prog,pct,checkDone,diffDays,lastLabel})=>{
+    const isWarn=diffDays!=null&&diffDays>=3;
+    const isRecent=diffDays!=null&&diffDays<1;
+    const rowClass=isWarn?'ss-warn':isRecent?'ss-active':'';
+    const warnTag=isWarn?`<span class="ss-warn-tag">⚠️ ${diffDays}일 경과</span>`:'';
+    const progText=c.total>0?`${prog}/${c.total}강 (${pct}%)`:`체크 ${checkDone}/${c.checkItems.length}`;
+    return `<div class="ss-row ${rowClass}">
+      <div class="ss-dot" style="background:${c.color}"></div>
+      <div class="ss-name">${c.icon} ${c.title}</div>
+      <div class="ss-minibar"><div class="ss-minibar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      <div class="ss-pct">${progText}</div>
+      ${warnTag}
+      <div class="ss-last">🕐 ${lastLabel}</div>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
